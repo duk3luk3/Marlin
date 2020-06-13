@@ -633,6 +633,10 @@
 
 //#define HOMING_BACKOFF_POST_MM { 2, 2, 2 }  // (mm) Backoff from endstops after homing
 
+#ifdef STM32F103RC_btt_512K_Ender3PRO
+#define QUICK_HOME
+#endif
+
 //#define QUICK_HOME                          // If G28 contains XY do a diagonal move first
 //#define HOME_Y_BEFORE_X                     // If G28 contains XY home Y before X
 //#define CODEPENDENT_XY_HOMING               // If X/Y can't home without homing Y/X first
@@ -801,7 +805,11 @@
 // Increase the slowdown divisor for larger buffer sizes.
 #define SLOWDOWN
 #if ENABLED(SLOWDOWN)
+  #ifdef STM32F103RC_btt_512K_Ender3PRO
+  #define SLOWDOWN_DIVISOR 8
+  #else
   #define SLOWDOWN_DIVISOR 2
+  #endif
 #endif
 
 /**
@@ -913,6 +921,9 @@
  * lowest stepping frequencies.
  */
 //#define ADAPTIVE_STEP_SMOOTHING
+#ifdef STM32F103RC_btt_512K_Ender3PRO
+#define ADAPTIVE_STEP_SMOOTHING
+#endif
 
 /**
  * Custom Microstepping
@@ -1041,6 +1052,9 @@
 
 // Scroll a longer status message into view
 //#define STATUS_MESSAGE_SCROLLING
+#ifdef STM32F103RC_btt_512K_Ender3PRO
+#define STATUS_MESSAGE_SCROLLING
+#endif
 
 // On the Info Screen, display XY with one decimal place when possible
 //#define LCD_DECIMAL_SMALL_XY
@@ -1059,11 +1073,16 @@
 #endif
 
 #if HAS_GRAPHICAL_LCD && EITHER(SDSUPPORT, LCD_SET_PROGRESS_MANUALLY)
+  #ifdef STM32F103RC_btt_512K_Ender3PRO
+  #define PRINT_PROGRESS_SHOW_DECIMALS
+  #define SHOW_REMAINING_TIME
+  #endif
+  
   //#define PRINT_PROGRESS_SHOW_DECIMALS // Show progress with decimal digits
   //#define SHOW_REMAINING_TIME          // Display estimated time to completion
   #if ENABLED(SHOW_REMAINING_TIME)
-    //#define USE_M73_REMAINING_TIME     // Use remaining time from M73 command instead of estimation
-    //#define ROTATE_PROGRESS_DISPLAY    // Display (P)rogress, (E)lapsed, and (R)emaining time
+    #define USE_M73_REMAINING_TIME     // Use remaining time from M73 command instead of estimation
+    #define ROTATE_PROGRESS_DISPLAY    // Display (P)rogress, (E)lapsed, and (R)emaining time
   #endif
 #endif
 
@@ -1171,7 +1190,7 @@
   //#define LONG_FILENAME_HOST_SUPPORT
 
   // Enable this option to scroll long filenames in the SD card menu
-  //#define SCROLL_LONG_FILENAMES
+  #define SCROLL_LONG_FILENAMES
 
   // Leave the heaters on after Stop Print (not recommended!)
   //#define SD_ABORT_NO_COOLDOWN
@@ -1256,6 +1275,11 @@
    * :[ 'LCD', 'ONBOARD', 'CUSTOM_CABLE' ]
    */
   //#define SDCARD_CONNECTION LCD
+  #ifdef STM32F103RC_btt_512K_Ender3PRO
+  #define SDCARD_CONNECTION ONBOARD
+  #endif
+
+  
 
 #endif // SDSUPPORT
 
@@ -1337,7 +1361,7 @@
   //#define STATUS_ALT_BED_BITMAP     // Use the alternative bed bitmap
   //#define STATUS_ALT_FAN_BITMAP     // Use the alternative fan bitmap
   //#define STATUS_FAN_FRAMES 3       // :[0,1,2,3,4] Number of fan animation frames
-  //#define STATUS_HEAT_PERCENT       // Show heating in a progress bar
+  #define STATUS_HEAT_PERCENT       // Show heating in a progress bar
   //#define BOOT_MARLIN_LOGO_SMALL    // Show a smaller Marlin logo on the Boot Screen (saving 399 bytes of flash)
   //#define BOOT_MARLIN_LOGO_ANIMATED // Animated Marlin logo. Costs ~‭3260 (or ~940) bytes of PROGMEM.
 
@@ -1565,10 +1589,15 @@
  *
  * See https://marlinfw.org/docs/features/lin_advance.html for full instructions.
  */
-//#define LIN_ADVANCE
+#define LIN_ADVANCE
 #if ENABLED(LIN_ADVANCE)
+  
   //#define EXTRA_LIN_ADVANCE_K // Enable for second linear advance constants
+  #ifdef STM32F103RC_btt_512K_Ender3PRO
+  #define LIN_ADVANCE_K 0.67
+  #else
   #define LIN_ADVANCE_K 0.22    // Unit: mm compression per 1mm/s extruder speed
+  #endif
   //#define LA_DEBUG            // If enabled, this will generate debug information output over USB.
   //#define EXPERIMENTAL_SCURVE // Enable this option to permit S-Curve Acceleration
 #endif
@@ -1802,6 +1831,9 @@
 
 // The number of lineear moves that can be in the planner at once.
 // The value of BLOCK_BUFFER_SIZE must be a power of 2 (e.g. 8, 16, 32)
+#ifdef STM32F103RC_btt_512K_Ender3PRO
+#define BLOCK_BUFFER_SIZE 32
+#else
 #if BOTH(SDSUPPORT, DIRECT_STEPPING)
   #define BLOCK_BUFFER_SIZE  8
 #elif ENABLED(SDSUPPORT)
@@ -1809,12 +1841,18 @@
 #else
   #define BLOCK_BUFFER_SIZE 16
 #endif
+#endif
 
 // @section serial
 
 // The ASCII buffer for serial input
+#ifdef STM32F103RC_btt_512K_Ender3PRO
+#define MAX_CMD_SIZE 96
+#define BUFSIZE 32
+#else
 #define MAX_CMD_SIZE 96
 #define BUFSIZE 4
+#endif
 
 // Transmission to Host Buffer Size
 // To save 386 bytes of PROGMEM (and TX_BUFFER_SIZE+3 bytes of RAM) set to 0.
@@ -1823,7 +1861,11 @@
 // For debug-echo: 128 bytes for the optimal speed.
 // Other output doesn't need to be that speedy.
 // :[0, 2, 4, 8, 16, 32, 64, 128, 256]
+#ifdef STM32F103RC_btt_512K_Ender3PRO
+#define TX_BUFFER_SIZE 32
+#else
 #define TX_BUFFER_SIZE 0
+#endif
 
 // Host Receive Buffer Size
 // Without XON/XOFF flow control (see SERIAL_XON_XOFF below) 32 bytes should be enough.
@@ -2176,7 +2218,11 @@
   #define INTERPOLATE       true  // Interpolate X/Y/Z_MICROSTEPS to 256
 
   #if AXIS_IS_TMC(X)
+    #ifdef STM32F103RC_btt_512K_Ender3PRO
+    #define X_CURRENT       580
+    #else
     #define X_CURRENT       800        // (mA) RMS current. Multiply by 1.414 for peak current.
+    #endif
     #define X_CURRENT_HOME  X_CURRENT  // (mA) RMS current for sensorless homing
     #define X_MICROSTEPS     16    // 0..256
     #define X_RSENSE          0.11
@@ -2192,7 +2238,11 @@
   #endif
 
   #if AXIS_IS_TMC(Y)
-    #define Y_CURRENT       800
+    #ifdef STM32F103RC_btt_512K_Ender3PRO
+    #define Y_CURRENT       580
+    #else
+    #define Y_CURRENT       800        // (mA) RMS current. Multiply by 1.414 for peak current.
+    #endif
     #define Y_CURRENT_HOME  Y_CURRENT
     #define Y_MICROSTEPS     16
     #define Y_RSENSE          0.11
@@ -2208,7 +2258,11 @@
   #endif
 
   #if AXIS_IS_TMC(Z)
-    #define Z_CURRENT       800
+    #ifdef STM32F103RC_btt_512K_Ender3PRO
+    #define Z_CURRENT       580
+    #else
+    #define Z_CURRENT       800        // (mA) RMS current. Multiply by 1.414 for peak current.
+    #endif
     #define Z_CURRENT_HOME  Z_CURRENT
     #define Z_MICROSTEPS     16
     #define Z_RSENSE          0.11
@@ -2240,7 +2294,11 @@
   #endif
 
   #if AXIS_IS_TMC(E0)
-    #define E0_CURRENT      800
+    #ifdef STM32F103RC_btt_512K_Ender3PRO
+    #define E0_CURRENT       650
+    #else
+    #define E0_CURRENT       800        // (mA) RMS current. Multiply by 1.414 for peak current.
+    #endif
     #define E0_MICROSTEPS    16
     #define E0_RSENSE         0.11
     #define E0_CHAIN_POS     -1
@@ -2385,7 +2443,11 @@
    * Define you own with
    * { <off_time[1..15]>, <hysteresis_end[-3..12]>, hysteresis_start[1..8] }
    */
+  #ifdef STM32F103RC_btt_512K_Ender3PRO
+  #define CHOPPER_TIMING CHOPPER_DEFAULT_24V
+  #else
   #define CHOPPER_TIMING CHOPPER_DEFAULT_12V
+  #endif
 
   /**
    * Monitor Trinamic drivers
@@ -2399,6 +2461,10 @@
    * M122 - Report driver parameters (Requires TMC_DEBUG)
    */
   //#define MONITOR_DRIVER_STATUS
+
+  #ifdef STM32F103RC_btt_512K_Ender3PRO
+  #define MONITOR_DRIVER_STATUS
+  #endif
 
   #if ENABLED(MONITOR_DRIVER_STATUS)
     #define CURRENT_STEP_DOWN     50  // [mA]
@@ -2414,6 +2480,10 @@
    * M913 X/Y/Z/E to live tune the setting
    */
   //#define HYBRID_THRESHOLD
+
+  #ifdef STM32F103RC_btt_512K_Ender3PRO
+  #define HYBRID_THRESHOLD
+  #endif
 
   #define X_HYBRID_THRESHOLD     100  // [mm/s]
   #define X2_HYBRID_THRESHOLD    100
@@ -3161,6 +3231,9 @@
  * Implement M486 to allow Marlin to skip objects
  */
 //#define CANCEL_OBJECTS
+#ifdef STM32F103RC_btt_512K_Ender3PRO
+#define CANCEL_OBJECTS
+#endif
 
 /**
  * I2C position encoders for closed loop control.
