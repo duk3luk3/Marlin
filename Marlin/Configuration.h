@@ -89,10 +89,14 @@
 #define SHOW_BOOTSCREEN
 
 // Show the bitmap in Marlin/_Bootscreen.h on startup.
+#if defined(STM32F103RC_btt_512K_Ender3PRO)
 #define SHOW_CUSTOM_BOOTSCREEN
+#endif
 
 // Show the bitmap in Marlin/_Statusscreen.h on the status screen.
+#if defined(STM32F103RC_btt_512K_Ender3PRO)
 #define CUSTOM_STATUS_SCREEN_IMAGE
+#endif
 
 // @section machine
 
@@ -104,8 +108,10 @@
  *
  * :[-1, 0, 1, 2, 3, 4, 5, 6, 7]
  */
-#ifdef STM32F103RC_btt_512K_Ender3PRO
+#if defined(STM32F103RC_btt_512K_Ender3PRO)
 #define SERIAL_PORT 2
+#elif defined(STM32F103VE_GTM32_Rev1B_M201)
+#define SERIAL_PORT 1
 #else
 
 #define SERIAL_PORT 0
@@ -131,8 +137,10 @@
  *
  * :[2400, 9600, 19200, 38400, 57600, 115200, 250000, 500000, 1000000]
  */
-#ifdef STM32F103RC_btt_512K_Ender3PRO
+#if defined(STM32F103RC_btt_512K_Ender3PRO)
 #define BAUDRATE 115200
+#elif defined(STM32F103VE_GTM32_Rev1B_M201)
+#define BAUDRATE 250000
 #else
 #define BAUDRATE 250000
 #endif
@@ -140,8 +148,10 @@
 // Enable the Bluetooth serial interface on AT90USB devices
 //#define BLUETOOTH
 
-#ifdef STM32F103RC_btt_512K_Ender3PRO
+#if defined(STM32F103RC_btt_512K_Ender3PRO)
 #define MOTHERBOARD BOARD_BTT_SKR_MINI_E3_V1_2
+#elif defined(STM32F103VE_GTM32_Rev1B_M201)
+#define MOTHERBOARD BOARD_GTM32_REV_B
 #endif
 
 // Choose the name from boards.h that matches your setup
@@ -445,7 +455,9 @@
 #define TEMP_SENSOR_5 0
 #define TEMP_SENSOR_6 0
 #define TEMP_SENSOR_7 0
-#ifdef STM32F103RC_btt_512K_Ender3PRO
+#if defined(STM32F103RC_btt_512K_Ender3PRO)
+#define TEMP_SENSOR_BED 1
+#elif defined(STM32F103VE_GTM32_Rev1B_M201)
 #define TEMP_SENSOR_BED 1
 #else
 #define TEMP_SENSOR_BED 0
@@ -1920,6 +1932,10 @@
 // Note: Usually sold with a white PCB.
 //
 //#define REPRAP_DISCOUNT_SMART_CONTROLLER
+#if defined(STM32F103VE_GTM32_Rev1B_M201)
+#define REPRAP_DISCOUNT_SMART_CONTROLLER
+#endif
+
 
 //
 // Original RADDS LCD Display+Encoder+SDCardReader
