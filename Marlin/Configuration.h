@@ -94,12 +94,16 @@
 // Show the bitmap in Marlin/_Bootscreen.h on startup.
 //#define SHOW_CUSTOM_BOOTSCREEN
 
+#if defined(STM32F103RC_btt_512K_Ender3PRO)
 #define SHOW_CUSTOM_BOOTSCREEN
+#endif
 
 // Show the bitmap in Marlin/_Statusscreen.h on the status screen.
 //#define CUSTOM_STATUS_SCREEN_IMAGE
 
+#if defined(STM32F103RC_btt_512K_Ender3PRO)
 #define CUSTOM_STATUS_SCREEN_IMAGE
+#endif
 
 // @section machine
 
@@ -116,6 +120,8 @@
 #undef SERIAL_PORT
 #ifdef STM32F103RC_btt_512K_Ender3PRO
 #define SERIAL_PORT 2
+#elif defined(STM32F103VE_GTM32_Rev1B_M201)
+#define SERIAL_PORT 1
 #else
 #define SERIAL_PORT 0
 #endif
@@ -129,6 +135,8 @@
 
 #ifdef STM32F103RC_btt_512K_Ender3PRO
 #define SERIAL_PORT_2 -1
+#else
+//#define SERIAL_PORT_2 -1
 #endif
 
 /**
@@ -145,6 +153,8 @@
 #undef BAUDRATE
 #ifdef STM32F103RC_btt_512K_Ender3PRO
 #define BAUDRATE 115200
+#elif defined(STM32F103VE_GTM32_Rev1B_M201)
+#define BAUDRATE 250000
 #else
 #define BAUDRATE 250000
 #endif
@@ -152,8 +162,10 @@
 // Enable the Bluetooth serial interface on AT90USB devices
 //#define BLUETOOTH
 
-#ifdef STM32F103RC_btt_512K_Ender3PRO
+#if defined(STM32F103RC_btt_512K_Ender3PRO)
 #define MOTHERBOARD BOARD_BTT_SKR_MINI_E3_V1_2
+#elif defined(STM32F103VE_GTM32_Rev1B_M201)
+#define MOTHERBOARD BOARD_GTM32_REV_B
 #endif
 
 // Choose the name from boards.h that matches your setup
@@ -167,6 +179,9 @@
 #ifdef STM32F103RC_btt_512K_Ender3PRO
 #define CUSTOM_MACHINE_NAME "E3PRO " __DATE__
 #endif
+
+// Name displayed in the LCD "Ready" message and Info menu
+//#define CUSTOM_MACHINE_NAME "3D Printer"
 
 // Printer's unique ID, used by some programs to differentiate between machines.
 // Choose your own or use a service like https://www.uuidgenerator.net/version4
@@ -455,7 +470,9 @@
 #define TEMP_SENSOR_CHAMBER 0
 
 #undef TEMP_SENSOR_BED
-#ifdef STM32F103RC_btt_512K_Ender3PRO
+#if defined(STM32F103RC_btt_512K_Ender3PRO)
+#define TEMP_SENSOR_BED 1
+#elif defined(STM32F103VE_GTM32_Rev1B_M201)
 #define TEMP_SENSOR_BED 1
 #else
 #define TEMP_SENSOR_BED 0
@@ -2114,7 +2131,6 @@
 // Add individual axis homing items (Home X, Home Y, and Home Z) to the LCD menu.
 //
 //#define INDIVIDUAL_AXIS_HOMING_MENU
-
 #define INDIVIDUAL_AXIS_HOMING_MENU
 
 //
@@ -2147,6 +2163,10 @@
 // Note: Usually sold with a white PCB.
 //
 //#define REPRAP_DISCOUNT_SMART_CONTROLLER
+#if defined(STM32F103VE_GTM32_Rev1B_M201)
+#define REPRAP_DISCOUNT_SMART_CONTROLLER
+#endif
+
 
 //
 // Original RADDS LCD Display+Encoder+SDCardReader
