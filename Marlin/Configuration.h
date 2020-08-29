@@ -73,6 +73,10 @@
 #define STRING_CONFIG_H_AUTHOR "(none, default config)" // Who made the changes.
 //#define CUSTOM_VERSION_FILE Version.h // Path from the root directory (no quotes)
 
+#undef STRING_CONFIG_H_AUTHOR
+#define STRING_CONFIG_H_AUTHOR "(Luke, " __DATE__ ")" // Who made the changes.
+
+
 /**
  * *** VENDORS PLEASE READ ***
  *
@@ -90,8 +94,12 @@
 // Show the bitmap in Marlin/_Bootscreen.h on startup.
 //#define SHOW_CUSTOM_BOOTSCREEN
 
+#define SHOW_CUSTOM_BOOTSCREEN
+
 // Show the bitmap in Marlin/_Statusscreen.h on the status screen.
 //#define CUSTOM_STATUS_SCREEN_IMAGE
+
+#define CUSTOM_STATUS_SCREEN_IMAGE
 
 // @section machine
 
@@ -105,12 +113,23 @@
  */
 #define SERIAL_PORT 0
 
+#undef SERIAL_PORT
+#ifdef STM32F103RC_btt_512K_Ender3PRO
+#define SERIAL_PORT 2
+#else
+#define SERIAL_PORT 0
+#endif
+
 /**
  * Select a secondary serial port on the board to use for communication with the host.
  * Currently Ethernet (-2) is only supported on Teensy 4.1 boards.
  * :[-2, -1, 0, 1, 2, 3, 4, 5, 6, 7]
  */
 //#define SERIAL_PORT_2 -1
+
+#ifdef STM32F103RC_btt_512K_Ender3PRO
+#define SERIAL_PORT_2 -1
+#endif
 
 /**
  * This setting determines the communication speed of the printer.
@@ -123,8 +142,19 @@
  */
 #define BAUDRATE 250000
 
+#undef BAUDRATE
+#ifdef STM32F103RC_btt_512K_Ender3PRO
+#define BAUDRATE 115200
+#else
+#define BAUDRATE 250000
+#endif
+
 // Enable the Bluetooth serial interface on AT90USB devices
 //#define BLUETOOTH
+
+#ifdef STM32F103RC_btt_512K_Ender3PRO
+#define MOTHERBOARD BOARD_BTT_SKR_MINI_E3_V1_2
+#endif
 
 // Choose the name from boards.h that matches your setup
 #ifndef MOTHERBOARD
@@ -133,6 +163,10 @@
 
 // Name displayed in the LCD "Ready" message and Info menu
 //#define CUSTOM_MACHINE_NAME "3D Printer"
+
+#ifdef STM32F103RC_btt_512K_Ender3PRO
+#define CUSTOM_MACHINE_NAME "E3PRO " __DATE__
+#endif
 
 // Printer's unique ID, used by some programs to differentiate between machines.
 // Choose your own or use a service like https://www.uuidgenerator.net/version4
@@ -420,6 +454,14 @@
 #define TEMP_SENSOR_PROBE 0
 #define TEMP_SENSOR_CHAMBER 0
 
+#undef TEMP_SENSOR_BED
+#ifdef STM32F103RC_btt_512K_Ender3PRO
+#define TEMP_SENSOR_BED 1
+#else
+#define TEMP_SENSOR_BED 0
+#endif
+
+
 // Dummy thermistor constant temperature readings, for use with 998 and 999
 #define DUMMY_THERMISTOR_998_VALUE 25
 #define DUMMY_THERMISTOR_999_VALUE 100
@@ -690,6 +732,13 @@
 //#define E6_DRIVER_TYPE A4988
 //#define E7_DRIVER_TYPE A4988
 
+#ifdef STM32F103RC_btt_512K_Ender3PRO
+#define X_DRIVER_TYPE TMC2209
+#define Y_DRIVER_TYPE TMC2209
+#define Z_DRIVER_TYPE TMC2209
+#define E0_DRIVER_TYPE TMC2209
+#endif
+
 // Enable this feature if all enabled endstop pins are interrupt-capable.
 // This will remove the need to poll the interrupt pins, saving many CPU cycles.
 //#define ENDSTOP_INTERRUPTS_FEATURE
@@ -738,12 +787,26 @@
  */
 #define DEFAULT_AXIS_STEPS_PER_UNIT   { 80, 80, 400, 500 }
 
+#undef DEFAULT_AXIS_STEPS_PER_UNIT
+#ifdef STM32F103RC_btt_512K_Ender3PRO
+#define DEFAULT_AXIS_STEPS_PER_UNIT   { 80, 80, 400, 93 }
+#else
+#define DEFAULT_AXIS_STEPS_PER_UNIT   { 80, 80, 4000, 500 }
+#endif
+
 /**
  * Default Max Feed Rate (mm/s)
  * Override with M203
  *                                      X, Y, Z, E0 [, E1[, E2...]]
  */
 #define DEFAULT_MAX_FEEDRATE          { 300, 300, 5, 25 }
+
+#undef DEFAULT_MAX_FEEDRATE
+#ifdef STM32F103RC_btt_512K_Ender3PRO
+#define DEFAULT_MAX_FEEDRATE          { 500, 500, 20, 60 }
+#else
+#define DEFAULT_MAX_FEEDRATE          { 300, 300, 5, 25 }
+#endif
 
 //#define LIMITED_MAX_FR_EDITING        // Limit edit via M203 or LCD to DEFAULT_MAX_FEEDRATE * 2
 #if ENABLED(LIMITED_MAX_FR_EDITING)
@@ -775,6 +838,19 @@
 #define DEFAULT_RETRACT_ACCELERATION  3000    // E acceleration for retracts
 #define DEFAULT_TRAVEL_ACCELERATION   3000    // X, Y, Z acceleration for travel (non printing) moves
 
+#undef DEFAULT_ACCELERATION
+#undef DEFAULT_RETRACT_ACCELERATION
+#undef DEFAULT_TRAVEL_ACCELERATION
+#ifdef STM32F103RC_btt_512K_Ender3PRO
+#define DEFAULT_ACCELERATION          500
+#define DEFAULT_RETRACT_ACCELERATION  500
+#define DEFAULT_TRAVEL_ACCELERATION   500
+#else
+#define DEFAULT_ACCELERATION          3000    // X, Y, Z and E acceleration for printing moves
+#define DEFAULT_RETRACT_ACCELERATION  3000    // E acceleration for retracts
+#define DEFAULT_TRAVEL_ACCELERATION   3000    // X, Y, Z acceleration for travel (non printing) moves
+#endif
+
 /**
  * Default Jerk limits (mm/s)
  * Override with M205 X Y Z E
@@ -784,12 +860,22 @@
  * value set here, it may happen instantaneously.
  */
 //#define CLASSIC_JERK
+
+#ifdef STM32F103RC_btt_512K_Ender3PRO
+#define CLASSIC_JERK
+#endif
+
 #if ENABLED(CLASSIC_JERK)
   #define DEFAULT_XJERK 10.0
   #define DEFAULT_YJERK 10.0
   #define DEFAULT_ZJERK  0.3
 
   //#define TRAVEL_EXTRA_XYJERK 0.0     // Additional jerk allowance for all travel moves
+
+  #ifdef STM32F103RC_btt_512K_Ender3PRO
+  #define TRAVEL_EXTRA_XYJERK 5.0
+  #endif
+
 
   //#define LIMITED_JERK_EDITING        // Limit edit via M205 or LCD to DEFAULT_aJERK * 2
   #if ENABLED(LIMITED_JERK_EDITING)
@@ -798,6 +884,13 @@
 #endif
 
 #define DEFAULT_EJERK    5.0  // May be used by Linear Advance
+
+#undef DEFAULT_EJERK
+#ifdef STM32F103RC_btt_512K_Ender3PRO
+#define DEFAULT_EJERK    15.0
+#else
+#define DEFAULT_EJERK    5.0  // May be used by Linear Advance
+#endif
 
 /**
  * Junction Deviation Factor
@@ -1124,6 +1217,19 @@
 #define INVERT_Y_DIR true
 #define INVERT_Z_DIR false
 
+#undef INVERT_X_DIR
+#undef INVERT_Y_DIR
+#undef INVERT_Z_DIR
+#ifdef STM32F103RC_btt_512K_Ender3PRO
+#define INVERT_X_DIR true
+#define INVERT_Y_DIR true
+#define INVERT_Z_DIR false
+#else
+#define INVERT_X_DIR false
+#define INVERT_Y_DIR true
+#define INVERT_Z_DIR false
+#endif
+
 // @section extruder
 
 // For direct drive extruder v9 set to true, for geared extruder set to false.
@@ -1135,6 +1241,34 @@
 #define INVERT_E5_DIR false
 #define INVERT_E6_DIR false
 #define INVERT_E7_DIR false
+
+#undef INVERT_E0_DIR
+#undef INVERT_E1_DIR
+#undef INVERT_E2_DIR
+#undef INVERT_E3_DIR
+#undef INVERT_E4_DIR
+#undef INVERT_E5_DIR
+#undef INVERT_E6_DIR
+#undef INVERT_E7_DIR
+#ifdef STM32F103RC_btt_512K_Ender3PRO
+#define INVERT_E0_DIR true
+#define INVERT_E1_DIR false
+#define INVERT_E2_DIR false
+#define INVERT_E3_DIR false
+#define INVERT_E4_DIR false
+#define INVERT_E5_DIR false
+#define INVERT_E6_DIR false
+#define INVERT_E7_DIR false
+#else
+#define INVERT_E0_DIR false
+#define INVERT_E1_DIR false
+#define INVERT_E2_DIR false
+#define INVERT_E3_DIR false
+#define INVERT_E4_DIR false
+#define INVERT_E5_DIR false
+#define INVERT_E6_DIR false
+#define INVERT_E7_DIR false
+#endif
 
 // @section homing
 
@@ -1159,6 +1293,16 @@
 #define X_BED_SIZE 200
 #define Y_BED_SIZE 200
 
+#undef X_BED_SIZE
+#undef Y_BED_SIZE
+#ifdef STM32F103RC_btt_512K_Ender3PRO
+#define X_BED_SIZE 235
+#define Y_BED_SIZE 235
+#else
+#define X_BED_SIZE 200
+#define Y_BED_SIZE 200
+#endif
+
 // Travel limits (mm) after homing, corresponding to endstop positions.
 #define X_MIN_POS 0
 #define Y_MIN_POS 0
@@ -1166,6 +1310,13 @@
 #define X_MAX_POS X_BED_SIZE
 #define Y_MAX_POS Y_BED_SIZE
 #define Z_MAX_POS 200
+
+#undef Z_MAX_POS
+#ifdef STM32F103RC_btt_512K_Ender3PRO
+#define Z_MAX_POS 250
+#else
+#define Z_MAX_POS 200
+#endif
 
 /**
  * Software Endstops
@@ -1440,9 +1591,21 @@
 // Add a menu item to move between bed corners for manual bed adjustment
 //#define LEVEL_BED_CORNERS
 
+#ifdef STM32F103RC_btt_512K_Ender3PRO
+#define LEVEL_BED_CORNERS
+#endif
+
 #if ENABLED(LEVEL_BED_CORNERS)
   #define LEVEL_CORNERS_INSET_LFRB { 30, 30, 30, 30 } // (mm) Left, Front, Right, Back insets
   #define LEVEL_CORNERS_HEIGHT      0.0   // (mm) Z height of nozzle at leveling points
+
+  #undef LEVEL_CORNERS_HEIGHT
+  #ifdef STM32F103RC_btt_512K_Ender3PRO
+  #define LEVEL_CORNERS_HEIGHT      0.1
+  #else
+  #define LEVEL_CORNERS_HEIGHT      0.0   // (mm) Z height of nozzle at leveling points
+  #endif
+
   #define LEVEL_CORNERS_Z_HOP       4.0   // (mm) Z height of nozzle between leveling points
   //#define LEVEL_CENTER_TOO              // Move to the center after the last corner
   //#define LEVEL_CORNERS_USE_PROBE
@@ -1480,6 +1643,8 @@
 // - Prevent Z homing when the Z probe is outside bed area.
 //
 //#define Z_SAFE_HOMING
+
+#define Z_SAFE_HOMING
 
 #if ENABLED(Z_SAFE_HOMING)
   #define Z_SAFE_HOMING_X_POINT X_CENTER  // X point for Z homing
@@ -1565,6 +1730,11 @@
  *   M502 - Revert settings to "factory" defaults. (Follow with M500 to init the EEPROM.)
  */
 //#define EEPROM_SETTINGS     // Persistent storage with M500 and M501
+
+#ifdef STM32F103RC_btt_512K_Ender3PRO
+#define EEPROM_SETTINGS
+#endif
+
 //#define DISABLE_M503        // Saves ~2700 bytes of PROGMEM. Disable for release!
 #define EEPROM_CHITCHAT       // Give feedback on EEPROM commands. Disable to save PROGMEM.
 #define EEPROM_BOOT_SILENT    // Keep M503 quiet and only give errors during first load
@@ -1617,6 +1787,10 @@
  *    P2  Raise the nozzle by Z-park amount, limited to Z_MAX_POS.
  */
 //#define NOZZLE_PARK_FEATURE
+
+#ifdef STM32F103RC_btt_512K_Ender3PRO
+#define NOZZLE_PARK_FEATURE
+#endif
 
 #if ENABLED(NOZZLE_PARK_FEATURE)
   // Specify a park position as { X, Y, Z_raise }
@@ -1823,6 +1997,10 @@
  */
 //#define SDSUPPORT
 
+#ifdef STM32F103RC_btt_512K_Ender3PRO
+#define SDSUPPORT
+#endif
+
 /**
  * SD CARD: ENABLE CRC
  *
@@ -1892,6 +2070,8 @@
 // Add individual axis homing items (Home X, Home Y, and Home Z) to the LCD menu.
 //
 //#define INDIVIDUAL_AXIS_HOMING_MENU
+
+#define INDIVIDUAL_AXIS_HOMING_MENU
 
 //
 // SPEAKER/BUZZER
@@ -2159,6 +2339,10 @@
 // (For CR-10 owners who want to replace the Melzi Creality board but retain the display)
 //
 //#define CR10_STOCKDISPLAY
+
+#ifdef STM32F103RC_btt_512K_Ender3PRO
+#define CR10_STOCKDISPLAY
+#endif
 
 //
 // Ender-2 OEM display, a variant of the MKS_MINI_12864
@@ -2459,6 +2643,10 @@
 // which is not as annoying as with the hardware PWM. On the other hand, if this frequency
 // is too low, you should also increment SOFT_PWM_SCALE.
 //#define FAN_SOFT_PWM
+
+#ifdef STM32F103RC_btt_512K_Ender3PRO
+#define FAN_SOFT_PWM
+#endif
 
 // Incrementing this by 1 will double the software PWM frequency,
 // affecting heaters, and the fan if FAN_SOFT_PWM is enabled.
