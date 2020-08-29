@@ -978,6 +978,10 @@
  */
 //#define NOZZLE_AS_PROBE
 
+#ifdef STM32F103RC_btt_512K_Ender3PRO
+#define NOZZLE_AS_PROBE
+#endif
+
 /**
  * Z Servo Probe, such as an endstop switch on a rotating arm.
  */
@@ -1081,6 +1085,13 @@
  */
 #define NOZZLE_TO_PROBE_OFFSET { 10, 10, 0 }
 
+#undef NOZZLE_TO_PROBE_OFFSET
+#ifdef STM32F103RC_btt_512K_Ender3PRO
+#define NOZZLE_TO_PROBE_OFFSET { 0, 0, 0 }
+#else
+#define NOZZLE_TO_PROBE_OFFSET { 10, 10, 0 }
+#endif
+
 // Most probes should stay away from the edges of the bed, but
 // with NOZZLE_AS_PROBE this can be negative for a wider probing area.
 #define PROBING_MARGIN 10
@@ -1090,6 +1101,13 @@
 
 // Feedrate (mm/min) for the first approach when double-probing (MULTIPLE_PROBING == 2)
 #define Z_PROBE_SPEED_FAST (4*60)
+
+#undef Z_PROBE_SPEED_FAST
+#ifdef STM32F103RC_btt_512K_Ender3PRO
+#define Z_PROBE_SPEED_FAST (HOMING_FEEDRATE_Z / 6)
+#else
+#define Z_PROBE_SPEED_FAST HOMING_FEEDRATE_Z
+#endif
 
 // Feedrate (mm/min) for the "accurate" probe of each point
 #define Z_PROBE_SPEED_SLOW (Z_PROBE_SPEED_FAST / 2)
@@ -1153,6 +1171,26 @@
 //#define Z_AFTER_PROBING           5 // Z position after probing is done
 
 #define Z_PROBE_LOW_POINT          -2 // Farthest distance below the trigger-point to go before stopping
+
+
+#undef Z_CLEARANCE_DEPLOY_PROBE
+#undef Z_CLEARANCE_BETWEEN_PROBES
+#undef Z_PROBE_LOW_POINT
+#ifdef STM32F103RC_btt_512K_Ender3PRO
+#define Z_CLEARANCE_DEPLOY_PROBE   3
+#define Z_CLEARANCE_BETWEEN_PROBES 3
+#define Z_CLEARANCE_MULTI_PROBE    3
+#define Z_AFTER_PROBING            3
+
+#define Z_PROBE_LOW_POINT          -10
+#else
+#define Z_CLEARANCE_DEPLOY_PROBE   10 // Z Clearance for Deploy/Stow
+#define Z_CLEARANCE_BETWEEN_PROBES  5 // Z Clearance between probe points
+#define Z_CLEARANCE_MULTI_PROBE     5 // Z Clearance between multiple probes
+//#define Z_AFTER_PROBING           5 // Z position after probing is done
+
+#define Z_PROBE_LOW_POINT          -2 // Farthest distance below the trigger-point to go before stopping
+#endif
 
 // For M851 give a range for adjusting the Z probe offset
 #define Z_PROBE_OFFSET_RANGE_MIN -20
@@ -1280,6 +1318,8 @@
                                   // Be sure to have this much clearance over your Z_MAX_POS to prevent grinding.
 
 //#define Z_AFTER_HOMING  10      // (mm) Height to move to after homing Z
+
+#define Z_AFTER_HOMING  2
 
 // Direction of endstops when homing; 1=MAX, -1=MIN
 // :[-1,1]
@@ -1462,6 +1502,10 @@
 //#define AUTO_BED_LEVELING_BILINEAR
 //#define AUTO_BED_LEVELING_UBL
 //#define MESH_BED_LEVELING
+
+#ifdef STM32F103RC_btt_512K_Ender3PRO
+#define AUTO_BED_LEVELING_BILINEAR
+#endif
 
 /**
  * Normally G28 leaves leveling disabled on completion. Enable one of
