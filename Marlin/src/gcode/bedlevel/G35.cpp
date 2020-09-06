@@ -93,6 +93,12 @@ void GcodeSuite::G35() {
     return;
   }
 
+  const uint8_t n_samples = parser.byteval('P', 1);
+  if (!WITHIN(n_samples, 1, 10)) {
+    SERIAL_ECHOLNPGM("?Sample size not plausible (1-10).");
+    return;
+  }
+
   // Wait for planner moves to finish!
   planner.synchronize();
 
@@ -129,7 +135,21 @@ void GcodeSuite::G35() {
     // length of the deployed pin (BLTOUCH stroke < 7mm)
     current_position.z = (Z_CLEARANCE_BETWEEN_PROBES) + (7 * ENABLED(BLTOUCH_HS_MODE));
 
-    const float z_probed_height = probe.probe_at_point(screws_tilt_adjust_pos[i], PROBE_PT_RAISE, 0, true);
+    float z_probed_height = 0.0f;
+
+    LOOP_L_N(k, n_samples) {
+      const float z_sample = probe.probe_at_point(screws_tilt_adjust_pos[i], PROBE_PT_RAISE, 0, true);
+
+      if (n_samples > 1 && (DEBUGGING(LEVELING) || verbose_level > 1)) {
+        DEBUG_ECHOPAIR("Sampled point ", int(i), " (", tramming_point_name[i], ")");
+        SERIAL_ECHOPAIR_P(SP_X_STR, screws_tilt_adjust_pos[i].x, SP_Y_STR, screws_tilt_adjust_pos[i].y);
+        SERIAL_ECHOLNPAIR_F(SP_Z_STR, z_sample, 4);
+      }
+
+      z_probed_height += z_sample;
+    }
+
+    z_probed_height /= (float)n_samples;
 
     if (isnan(z_probed_height)) {
       SERIAL_ECHOPAIR("G35 failed at point ", int(i), " (", tramming_point_name[i], ")");
