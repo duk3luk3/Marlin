@@ -99,6 +99,12 @@ void GcodeSuite::G35() {
     return;
   }
 
+  const uint8_t do_home = parser.byteval('Z', 1);
+  if (!WITHIN(do_home, 0, 1)) {
+    SERIAL_ECHOLNPGM("?(Z) Home implausible (0-1).");
+    return;
+  }
+
   // Wait for planner moves to finish!
   planner.synchronize();
 
@@ -123,7 +129,9 @@ void GcodeSuite::G35() {
   #endif
 
   // Home all before this procedure
-  home_all_axes();
+  if (do_home) {
+    home_all_axes();
+  }
 
   bool err_break = false;
 
@@ -203,11 +211,13 @@ void GcodeSuite::G35() {
   // the probe deployed if it was successful.
   probe.stow();
 
-  // After this operation the Z position needs correction
-  set_axis_never_homed(Z_AXIS);
+  if (do_home) {
+    // After this operation the Z position needs correction
+    set_axis_never_homed(Z_AXIS);
 
-  // Home Z after the alignment procedure
-  process_subcommands_now_P(PSTR("G28Z"));
+    // Home Z after the alignment procedure
+    process_subcommands_now_P(PSTR("G28Z"));
+  }
 }
 
 #endif // ASSISTED_TRAMMING
