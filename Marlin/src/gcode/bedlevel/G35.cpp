@@ -139,7 +139,7 @@ void GcodeSuite::G35() {
     }
 
     if (DEBUGGING(LEVELING) || verbose_level > 0) {
-      DEBUG_ECHOPAIR("Probing point ", int(i), " (", tramming_point_name[i], ")");
+      DEBUG_ECHOPAIR("Probed point ", int(i), " (", tramming_point_name[i], ")");
       SERIAL_ECHOLNPAIR_P(SP_X_STR, screws_tilt_adjust_pos[i].x, SP_Y_STR, screws_tilt_adjust_pos[i].y, SP_Z_STR, z_probed_height);
     }
 
