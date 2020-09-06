@@ -87,6 +87,12 @@ void GcodeSuite::G35() {
     return;
   }
 
+  const uint8_t verbose_level = parser.byteval('V', 0);
+  if (!WITHIN(verbose_level, 0, 4)) {
+    SERIAL_ECHOLNPGM("?(V)erbose level implausible (0-4).");
+    return;
+  }
+
   // Wait for planner moves to finish!
   planner.synchronize();
 
@@ -132,7 +138,7 @@ void GcodeSuite::G35() {
       break;
     }
 
-    if (DEBUGGING(LEVELING)) {
+    if (DEBUGGING(LEVELING) || verbose_level > 0) {
       DEBUG_ECHOPAIR("Probing point ", int(i), " (", tramming_point_name[i], ")");
       SERIAL_ECHOLNPAIR_P(SP_X_STR, screws_tilt_adjust_pos[i].x, SP_Y_STR, screws_tilt_adjust_pos[i].y, SP_Z_STR, z_probed_height);
     }
