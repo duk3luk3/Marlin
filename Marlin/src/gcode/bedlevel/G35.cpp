@@ -144,6 +144,8 @@ void GcodeSuite::G35() {
     const float threads_factor[] = { 0.5, 0.7, 0.8 };
 
     // Calculate adjusts
+    // The loop starts at 1 because we use the first probe point as the datum
+    // i.e. we adjust the other probe points in relation to it
     LOOP_S_L_N(i, 1, G35_PROBE_COUNT) {
       const float diff = z_measured[0] - z_measured[i],
                   adjust = abs(diff) < 0.001f ? 0 : diff / threads_factor[(screw_thread - 30) / 10];
