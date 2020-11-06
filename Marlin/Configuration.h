@@ -760,6 +760,10 @@
 // This will remove the need to poll the interrupt pins, saving many CPU cycles.
 //#define ENDSTOP_INTERRUPTS_FEATURE
 
+#ifdef STM32F103RC_btt_512K_Ender3PRO
+#define ENDSTOP_INTERRUPTS_FEATURE
+#endif
+
 /**
  * Endstop Noise Threshold
  *
@@ -806,7 +810,11 @@
 
 #undef DEFAULT_AXIS_STEPS_PER_UNIT
 #ifdef STM32F103RC_btt_512K_Ender3PRO
-#define DEFAULT_AXIS_STEPS_PER_UNIT   { 80, 80, 400, 93 }
+// 16 Z axis microsteps
+//#define DEFAULT_AXIS_STEPS_PER_UNIT   { 80, 80, 400, 93 }
+// 64 Z axis microsteps
+#define DEFAULT_AXIS_STEPS_PER_UNIT   { 80, 80, 1600, 93 }
+
 #else
 #define DEFAULT_AXIS_STEPS_PER_UNIT   { 80, 80, 4000, 500 }
 #endif
@@ -1111,7 +1119,7 @@
 
 // Most probes should stay away from the edges of the bed, but
 // with NOZZLE_AS_PROBE this can be negative for a wider probing area.
-#define PROBING_MARGIN 10
+#define PROBING_MARGIN 0
 
 // X and Y axis travel speed (mm/min) between probes
 #define XY_PROBE_SPEED (133*60)
@@ -1127,7 +1135,7 @@
 #endif
 
 // Feedrate (mm/min) for the "accurate" probe of each point
-#define Z_PROBE_SPEED_SLOW (Z_PROBE_SPEED_FAST / 2)
+#define Z_PROBE_SPEED_SLOW (Z_PROBE_SPEED_FAST / 4)
 
 /**
  * Probe Activation Switch
@@ -1187,19 +1195,23 @@
 #define Z_CLEARANCE_MULTI_PROBE     5 // Z Clearance between multiple probes
 //#define Z_AFTER_PROBING           5 // Z position after probing is done
 
-#define Z_PROBE_LOW_POINT          -2 // Farthest distance below the trigger-point to go before stopping
+#define Z_PROBE_LOW_POINT          -5 // Farthest distance below the trigger-point to go before stopping
 
 
 #undef Z_CLEARANCE_DEPLOY_PROBE
 #undef Z_CLEARANCE_BETWEEN_PROBES
+#undef Z_CLEARANCE_MULTI_PROBE
 #undef Z_PROBE_LOW_POINT
 #ifdef STM32F103RC_btt_512K_Ender3PRO
 #define Z_CLEARANCE_DEPLOY_PROBE   3
 #define Z_CLEARANCE_BETWEEN_PROBES 3
 #define Z_CLEARANCE_MULTI_PROBE    3
-#define Z_AFTER_PROBING            3
+#define Z_AFTER_PROBING            5
 
-#define Z_PROBE_LOW_POINT          -10
+#define Z_PROBE_LOW_POINT          -1
+
+#define DEBUG_LEVELING_FEATURE
+
 #else
 #define Z_CLEARANCE_DEPLOY_PROBE   10 // Z Clearance for Deploy/Stow
 #define Z_CLEARANCE_BETWEEN_PROBES  5 // Z Clearance between probe points
@@ -1215,6 +1227,10 @@
 
 // Enable the M48 repeatability test to test probe accuracy
 //#define Z_MIN_PROBE_REPEATABILITY_TEST
+
+#ifdef STM32F103RC_btt_512K_Ender3PRO
+#define Z_MIN_PROBE_REPEATABILITY_TEST
+#endif
 
 // Before deploy/stow pause for user confirmation
 //#define PAUSE_BEFORE_DEPLOY_STOW
@@ -1334,9 +1350,11 @@
 //#define Z_HOMING_HEIGHT  4      // (mm) Minimal Z height before homing (G28) for Z clearance above the bed, clamps, ...
                                   // Be sure to have this much clearance over your Z_MAX_POS to prevent grinding.
 
+#define Z_HOMING_HEIGHT  8
+
 //#define Z_AFTER_HOMING  10      // (mm) Height to move to after homing Z
 
-#define Z_AFTER_HOMING  2
+#define Z_AFTER_HOMING  8
 
 // Direction of endstops when homing; 1=MAX, -1=MIN
 // :[-1,1]
@@ -1353,8 +1371,8 @@
 #undef X_BED_SIZE
 #undef Y_BED_SIZE
 #ifdef STM32F103RC_btt_512K_Ender3PRO
-#define X_BED_SIZE 235
-#define Y_BED_SIZE 235
+#define X_BED_SIZE 220
+#define Y_BED_SIZE 220
 #else
 #define X_BED_SIZE 200
 #define Y_BED_SIZE 200
@@ -1370,6 +1388,12 @@
 
 #undef Z_MAX_POS
 #ifdef STM32F103RC_btt_512K_Ender3PRO
+#undef X_MIN_POS
+#undef Y_MIN_POS
+
+#define X_MIN_POS -10
+#define Y_MIN_POS -13
+
 #define Z_MAX_POS 250
 #else
 #define Z_MAX_POS 200
@@ -1521,7 +1545,8 @@
 //#define MESH_BED_LEVELING
 
 #ifdef STM32F103RC_btt_512K_Ender3PRO
-#define AUTO_BED_LEVELING_BILINEAR
+#define AUTO_BED_LEVELING_UBL
+#define RESTORE_LEVELING_AFTER_G28 false
 #endif
 
 /**
@@ -1547,6 +1572,10 @@
  * NOTE: Requires a lot of PROGMEM!
  */
 //#define DEBUG_LEVELING_FEATURE
+
+#ifdef STM32F103RC_btt_512K_Ender3PRO
+#define DEBUG_LEVELING_FEATURE
+#endif
 
 #if ANY(MESH_BED_LEVELING, AUTO_BED_LEVELING_BILINEAR, AUTO_BED_LEVELING_UBL)
   // Gradually reduce leveling correction until a set height is reached,
@@ -1642,6 +1671,10 @@
  * Include a guided procedure if manual probing is enabled.
  */
 //#define LCD_BED_LEVELING
+
+#ifdef STM32F103RC_btt_512K_Ender3PRO
+#define LCD_BED_LEVELING
+#endif
 
 #if ENABLED(LCD_BED_LEVELING)
   #define MESH_EDIT_Z_STEP  0.025 // (mm) Step size while manually probing Z axis.

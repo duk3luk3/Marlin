@@ -67,6 +67,24 @@ void GcodeSuite::G35() {
     return;
   }
 
+  const uint8_t verbose_level = parser.byteval('V', 0);
+  if (!WITHIN(verbose_level, 0, 4)) {
+    SERIAL_ECHOLNPGM("?(V)erbose level implausible (0-4).");
+    return;
+  }
+
+  const uint8_t n_samples = parser.byteval('P', 1);
+  if (!WITHIN(n_samples, 1, 10)) {
+    SERIAL_ECHOLNPGM("?Sample size not plausible (1-10).");
+    return;
+  }
+
+  const uint8_t do_home = parser.byteval('Z', 1);
+  if (!WITHIN(do_home, 0, 1)) {
+    SERIAL_ECHOLNPGM("?(Z) Home implausible (0-1).");
+    return;
+  }
+
   // Wait for planner moves to finish!
   planner.synchronize();
 
@@ -90,7 +108,9 @@ void GcodeSuite::G35() {
   TERN_(HAS_DUPLICATION_MODE, set_duplication_enabled(false));
 
   // Home all before this procedure
-  home_all_axes();
+  if (do_home) {
+    home_all_axes();
+  }
 
   bool err_break = false;
 
@@ -101,7 +121,22 @@ void GcodeSuite::G35() {
     // Users of G35 might have a badly misaligned bed, so raise Z by the
     // length of the deployed pin (BLTOUCH stroke < 7mm)
     do_blocking_move_to_z((Z_CLEARANCE_BETWEEN_PROBES) + TERN0(BLTOUCH_HS_MODE, 7));
-    const float z_probed_height = probe.probe_at_point(screws_tilt_adjust_pos[i], PROBE_PT_RAISE, 0, true);
+
+    float z_probed_height = 0.0f;
+
+    LOOP_L_N(k, n_samples) {
+      const float z_sample = probe.probe_at_point(screws_tilt_adjust_pos[i], PROBE_PT_RAISE, 0, true);
+
+      if (n_samples > 1 && (DEBUGGING(LEVELING) || verbose_level > 1)) {
+        DEBUG_ECHOPAIR("Sampled point ", int(i), " (", tramming_point_name[i], ")");
+        SERIAL_ECHOPAIR_P(SP_X_STR, screws_tilt_adjust_pos[i].x, SP_Y_STR, screws_tilt_adjust_pos[i].y);
+        SERIAL_ECHOLNPAIR_F(SP_Z_STR, z_sample, 4);
+      }
+
+      z_probed_height += z_sample;
+    }
+
+    z_probed_height /= (float)n_samples;
 
     if (isnan(z_probed_height)) {
       SERIAL_ECHOPAIR("G35 failed at point ", int(i), " (");
@@ -112,8 +147,8 @@ void GcodeSuite::G35() {
       break;
     }
 
-    if (DEBUGGING(LEVELING)) {
-      DEBUG_ECHOPAIR("Probing point ", int(i), " (");
+    if (DEBUGGING(LEVELING) || verbose_level > 0) {
+      DEBUG_ECHOPAIR("Probed point ", int(i), " (");
       DEBUG_PRINT_P((char *)pgm_read_ptr(&tramming_point_name[i]));
       DEBUG_CHAR(')');
       DEBUG_ECHOLNPAIR_P(SP_X_STR, screws_tilt_adjust_pos[i].x, SP_Y_STR, screws_tilt_adjust_pos[i].y, SP_Z_STR, z_probed_height);
@@ -126,6 +161,8 @@ void GcodeSuite::G35() {
     const float threads_factor[] = { 0.5, 0.7, 0.8 };
 
     // Calculate adjusts
+    // The loop starts at 1 because we use the first probe point as the datum
+    // i.e. we adjust the other probe points in relation to it
     LOOP_S_L_N(i, 1, G35_PROBE_COUNT) {
       const float diff = z_measured[0] - z_measured[i],
                   adjust = abs(diff) < 0.001f ? 0 : diff / threads_factor[(screw_thread - 30) / 10];
@@ -160,8 +197,10 @@ void GcodeSuite::G35() {
 
   move_to_tramming_wait_pos();
 
-  // After this operation the Z position needs correction
-  set_axis_never_homed(Z_AXIS);
+  if (do_home) {
+    // After this operation the Z position needs correction
+    set_axis_never_homed(Z_AXIS);
+  }
 }
 
 #endif // ASSISTED_TRAMMING

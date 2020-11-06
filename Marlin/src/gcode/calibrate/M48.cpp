@@ -119,13 +119,14 @@ void GcodeSuite::M48() {
         max = -99999.9, // Largest value sampled so far
         sample_set[n_samples];  // Storage for sampled values
 
-  auto dev_report = [](const bool verbose, const float &mean, const float &sigma, const float &min, const float &max, const bool final=false) {
+  auto dev_report = [](const bool verbose, const float &mean, const float &sigma, const float &min, const float &max, const float &delta, const bool final=false) {
     if (verbose) {
       SERIAL_ECHOPAIR_F("Mean: ", mean, 6);
       if (!final) SERIAL_ECHOPAIR_F(" Sigma: ", sigma, 6);
       SERIAL_ECHOPAIR_F(" Min: ", min, 3);
       SERIAL_ECHOPAIR_F(" Max: ", max, 3);
       SERIAL_ECHOPAIR_F(" Range: ", max-min, 3);
+      SERIAL_ECHOPAIR_F(" Delta: ", delta, 5);
       if (final) SERIAL_EOL();
     }
     if (final) {
@@ -241,11 +242,19 @@ void GcodeSuite::M48() {
       LOOP_LE_N(j, n) dev_sum += sq(sample_set[j] - mean);
       sigma = SQRT(dev_sum / (n + 1));
 
+      const float delta = ((n > 0) ? sample_set[n] - sample_set[n-1] : 0.0f);
+
       if (verbose_level > 1) {
+        if (n<9) {
+          SERIAL_ECHO("0");
+        }
         SERIAL_ECHO(n + 1);
         SERIAL_ECHOPAIR(" of ", int(n_samples));
-        SERIAL_ECHOPAIR_F(": z: ", pz, 3);
-        dev_report(verbose_level > 2, mean, sigma, min, max);
+        SERIAL_ECHOPAIR_F(": z: ", pz, 5);
+        if (verbose_level > 2) {
+          SERIAL_ECHO(" ");
+        }
+        dev_report(verbose_level > 2, mean, sigma, min, max, delta);
         SERIAL_EOL();
       }
 
@@ -256,7 +265,7 @@ void GcodeSuite::M48() {
 
   if (probing_good) {
     SERIAL_ECHOLNPGM("Finished!");
-    dev_report(verbose_level > 0, mean, sigma, min, max, true);
+    dev_report(verbose_level > 0, mean, sigma, min, max, 0.0f, true);
 
     #if HAS_WIRED_LCD
       // Display M48 results in the status bar

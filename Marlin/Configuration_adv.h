@@ -524,6 +524,10 @@
 // enable this option. Override at any time with M120, M121.
 //#define ENDSTOPS_ALWAYS_ON_DEFAULT
 
+#ifdef STM32F103RC_btt_512K_Ender3PRO
+#define ENDSTOPS_ALWAYS_ON_DEFAULT
+#endif
+
 // @section extras
 
 //#define Z_LATE_ENABLE // Enable Z the last moment. Needed if your Z driver overheats.
@@ -799,6 +803,13 @@
 // Add the G35 command to read bed corners to help adjust screws. Requires a bed probe.
 //
 //#define ASSISTED_TRAMMING
+
+#ifdef STM32F103RC_btt_512K_Ender3PRO
+#define ASSISTED_TRAMMING
+#endif
+
+
+
 #if ENABLED(ASSISTED_TRAMMING)
 
   // Define positions for probe points.
@@ -893,6 +904,11 @@
 // Adds extra movement to axes on direction-changes to account for backlash.
 //
 //#define BACKLASH_COMPENSATION
+
+#ifdef STM32F103RC_btt_512K_Ender3PRO
+  #define BACKLASH_COMPENSATION
+#endif
+
 #if ENABLED(BACKLASH_COMPENSATION)
   // Define values for backlash distance and correction.
   // If BACKLASH_GCODE is enabled these values are the defaults.
@@ -905,6 +921,10 @@
 
   // Add runtime configuration and tuning of backlash values (M425)
   //#define BACKLASH_GCODE
+
+  #ifdef STM32F103RC_btt_512K_Ender3PRO
+    #define BACKLASH_GCODE
+  #endif 
 
   #if ENABLED(BACKLASH_GCODE)
     // Measure the Z backlash when probing (G29) and set with "M425 Z"
@@ -1229,6 +1249,9 @@
 
   #define EVENT_GCODE_SD_ABORT "G28XY"      // G-code to run on SD Abort Print (e.g., "G28XY" or "G27")
 
+  #undef EVENT_GCODE_SD_ABORT
+  #define EVENT_GCODE_SD_ABORT "G27"
+
   #if ENABLED(PRINTER_EVENT_LEDS)
     #define PE_LEDS_COMPLETED_TIME  (30*60) // (seconds) Time to keep the LED "done" color before restoring normal illumination
   #endif
@@ -1318,6 +1341,10 @@
    * To have any effect, endstops must be enabled during SD printing.
    */
   //#define SD_ABORT_ON_ENDSTOP_HIT
+
+  #ifdef STM32F103RC_btt_512K_Ender3PRO
+  #define SD_ABORT_ON_ENDSTOP_HIT
+  #endif
 
   /**
    * This option makes it easier to print the same SD Card file again.
@@ -2416,18 +2443,19 @@
 
   #if AXIS_IS_TMC(Z)
     #define Z_CURRENT       800
-
-    #undef Z_CURRENT
-    #ifdef STM32F103RC_btt_512K_Ender3PRO
-    #define Z_CURRENT       580
-    #else
-    #define Z_CURRENT       800        // (mA) RMS current. Multiply by 1.414 for peak current.
-    #endif
     #define Z_CURRENT_HOME  Z_CURRENT
     #define Z_MICROSTEPS     16
     #define Z_RSENSE          0.11
     #define Z_CHAIN_POS      -1
     //#define Z_INTERPOLATE  true
+
+    #ifdef STM32F103RC_btt_512K_Ender3PRO
+      #undef Z_CURRENT
+      #define Z_CURRENT       580
+      #undef Z_MICROSTEPS
+      #define Z_MICROSTEPS     64
+    #endif
+
   #endif
 
   #if AXIS_IS_TMC(Z2)
@@ -2748,6 +2776,13 @@
    */
    //#define TMC_HOME_PHASE { 896, 896, 896 }
 
+   
+  #ifdef STM32F103RC_btt_512K_Ender3PRO
+    //#define TMC_HOME_PHASE { 128, 128, 640 }
+  #endif
+
+
+
   /**
    * Beta feature!
    * Create a 50/50 square wave step pulse optimal for stepper drivers.
@@ -2759,6 +2794,10 @@
    * M122 S0/1 will enable continous reporting.
    */
   //#define TMC_DEBUG
+
+  #ifdef STM32F103RC_btt_512K_Ender3PRO
+  #define TMC_DEBUG
+  #endif
 
   /**
    * You can set your own advanced settings by filling in predefined functions.
